@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mariadb:11.4
+    container_name: uptime-kuma-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: uptimekuma
+      MARIADB_USER: kuma
+      MARIADB_PASSWORD: ${KUMA_DB_PASSWORD}
+    volumes:
+      - kuma-db-data:/var/lib/mysql
+    networks:
+      - kuma-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - kuma-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  uptime-kuma-data:
+    name: uptime-kuma_uptime-kuma-data
+  kuma-db-data:
+    name: uptime-kuma_mariadb-data
+
+networks:
+  kuma-network:
+    driver: bridge
