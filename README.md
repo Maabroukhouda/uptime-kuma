@@ -1,4 +1,3 @@
-import pypandoc, osmd = r'''
 # Installation d'Uptime Kuma 2 avec MariaDB — Procédure pas à pas
 
 **VM :** `monitoring`  
